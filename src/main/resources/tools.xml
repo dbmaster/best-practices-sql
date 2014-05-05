@@ -1,0 +1,43 @@
+<tools>
+    <tool id="db-best-practices" title="Database Best Practices" projectTypes="inventory">
+
+        <description>Checks database servers for compliance with best practices</description>
+
+        <help><![CDATA[
+            
+<h2 id="FragmentedIndexes">FragmentedIndexes</h2>
+<p>Checks indexes for fragmentation</p>
+<h3>Properties</h3>
+<table class="parameters" border="1" style="border:solid thin">
+<tr><td>property name</td><td>description</td><td>type</td><td>default value</td></tr>
+<tr><td>min_page_count</td><td>Index should have at least <code>min_page_count</code> of pages to be included into check</td><td>integer</td><td>500</td></tr>
+<tr><td>min_fragmentation</td><td>When index fragmentation exceeds <code>min_fragmentation</code> percent a message will be generated</td><td>integer</td><td>30</td></tr>
+</table>
+
+        ]]></help>
+
+        <parameters>
+             <parameter name="p_modules" title="Module" type="string" required="false" multiple="true" width="300">
+                <values>
+                    <string>FragmentedIndexes</string>
+                </values>
+             </parameter>
+
+             <parameter name="p_servers"        title="Server"   type="string" required="false" multiple="true" 
+                        suggestion="connections" width="300" />
+
+             <parameter name="p_properties"    title="Properties"   type="text" required="false" width="100" height="5" />
+
+             <parameter name="p_severity"      title="Severity"   type="string" required="false">
+                <values>
+                    <string>error</string>
+                    <string>warning</string>
+                    <string>info</string>
+                </values>
+             </parameter>
+
+        </parameters>
+
+        <output  script="db-best-practices.groovy" type="html" />
+    </tool>
+</tools>
