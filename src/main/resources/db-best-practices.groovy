@@ -69,7 +69,15 @@ def modules
 if (p_modules!=null && p_modules.size()>0) {
     modules = p_modules 
 } else {
-    modules  = ["FragmentedIndexes"]
+    modules  =
+        ["NonDefaultStartupProc", "ForeignKeysNoIndexes",  "WideIndex",  "DuplicateIndexes",
+         "ExtraIndexes", "FragmentedIndexes", "NoIndexes", "NoClusteredIndexes", "OutdatedStatistics",
+         "AutoCreateStatistics",  "AutoUpdateStatistics", "TempDbFileSizeDifferent", "TempDbSingleFile",
+         "UserAndTempDbSameDisk", "SmallTempDbSize", "AutoShrinkEnabled",  "LargeAutoGrowth",
+         "ChecksumDisabled", "LowCompatibilityLevel", "LoginsWithoutPolicy",
+         "SimpleRecoveryMode", "NonMasterCollation", "ServerAdmins", "DatabaseAdmins",  "JobOwnerIsAdmin",
+         "AutoGrowthIsPercentage", "RedundantIndexes", "NoDataPurityCheck", "NoDbccCheck","OrphanedLogins",
+         "OrphanedUsers"]
 }
 println  """
    <table class="simple-table" cellspacing="0" cellpadding="10">

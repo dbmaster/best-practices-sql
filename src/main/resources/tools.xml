@@ -19,7 +19,39 @@
         <parameters>
              <parameter name="p_modules" title="Module" type="string" required="false" multiple="true" width="300">
                 <values>
+                    <string>NonDefaultStartupProc</string>
+                    <string>ForeignKeysNoIndexes</string>
+                    <string>WideIndex</string>
+                    <string>DuplicateIndexes</string>
+                    <string>ExtraIndexes</string>
                     <string>FragmentedIndexes</string>
+                    <string>NoIndexes</string>
+                    <string>NoClusteredIndexes</string>
+                    <string>OutdatedStatistics</string>
+                    <string>AutoCreateStatistics</string>
+                    <string>AutoUpdateStatistics</string>
+                    <string>TempDbFileSizeDifferent</string>
+                    <string>TempDbSingleFile</string>
+                    <string>UserAndTempDbSameDisk</string>
+                    <string>SmallTempDbSize</string>
+                    <string>AutoShrinkEnabled</string>
+                    <string>LargeAutoGrowth</string>
+                  <!--   <string>BackupsAndDataFilesSameDrive</string>  -->
+                    <string>ChecksumDisabled</string>
+                    <string>LowCompatibilityLevel</string>
+                    <string>LoginsWithoutPolicy</string>
+                    <string>SimpleRecoveryMode</string>
+                    <string>NonMasterCollation</string>
+                    <string>ServerAdmins</string>
+                    <string>OrphanedLogins</string>
+                    <string>OrphanedUsers</string>
+                    <string>DatabaseAdmins</string>
+                    <string>JobOwnerIsAdmin</string>
+                    <string>AutoGrowthIsPercentage</string>
+                    <string>RedundantIndexes</string>
+                    <string>NoDataPurityCheck</string>
+                    <string>NoDbccCheck</string>
+                  <!--  <string>HighPagePerSec</string> -->
                 </values>
              </parameter>
 
@@ -58,7 +90,39 @@
         <parameters>
              <parameter name="p_modules" title="Module" type="string" required="false" multiple="true" width="300">
                 <values>
+                    <string>NonDefaultStartupProc</string>
+                    <string>ForeignKeysNoIndexes</string>
+                    <string>WideIndex</string>
+                    <string>DuplicateIndexes</string>
+                    <string>ExtraIndexes</string>
                     <string>FragmentedIndexes</string>
+                    <string>NoIndexes</string>
+                    <string>NoClusteredIndexes</string>
+                    <string>OutdatedStatistics</string>
+                    <string>AutoCreateStatistics</string>
+                    <string>AutoUpdateStatistics</string>
+                    <string>TempDbFileSizeDifferent</string>
+                    <string>TempDbSingleFile</string>
+                    <string>UserAndTempDbSameDisk</string>
+                    <string>SmallTempDbSize</string>
+                    <string>AutoShrinkEnabled</string>
+                    <string>LargeAutoGrowth</string>
+                  <!--   <string>BackupsAndDataFilesSameDrive</string>  -->
+                    <string>ChecksumDisabled</string>
+                    <string>LowCompatibilityLevel</string>
+                    <string>LoginsWithoutPolicy</string>
+                    <string>SimpleRecoveryMode</string>
+                    <string>NonMasterCollation</string>
+                    <string>ServerAdmins</string>
+                    <string>OrphanedLogins</string>
+                    <string>OrphanedUsers</string>
+                    <string>DatabaseAdmins</string>
+                    <string>JobOwnerIsAdmin</string>
+                    <string>AutoGrowthIsPercentage</string>
+                    <string>RedundantIndexes</string>
+                    <string>NoDataPurityCheck</string>
+                    <string>NoDbccCheck</string>
+                  <!--  <string>HighPagePerSec</string> -->
                 </values>
              </parameter>
 
