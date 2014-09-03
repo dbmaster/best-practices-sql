@@ -3,6 +3,7 @@ import java.util.Iterator
 import java.util.List
 import java.util.Map.Entry
 import com.branegy.service.base.api.ProjectService;
+import org.dbmaster.dbstyle.api.InputFilter;
 import com.branegy.service.core.QueryRequest
 import com.branegy.service.connection.api.ConnectionService
 import com.branegy.dbmaster.connection.ConnectionProvider
@@ -93,32 +94,42 @@ println  """
         </tr>
 """
 
+def cl = this.getClass().getClassLoader();
+InputFilter filter = cl.parseClass(p_filter).newInstance();
+
+filter.init([dbm:dbm,logger:logger]);
+
 dbConnections.each { connectionInfo ->
-try {    
+try {
     connector = ConnectionProvider.getConnector(connectionInfo)
     def serverName = connectionInfo.getName()
     if (!(connector instanceof JdbcConnector)) {
         logger.info("Skipping checks for connection ${connectionInfo.getName()} as it is not a database one")
         return
     }
+    if (!filter.accept(connectionInfo)){
+        return;
+    }
+
     connection = connector.getJdbcConnection(null)
     connection.setTransactionIsolation(java.sql.Connection.TRANSACTION_READ_UNCOMMITTED)
     dbm.closeResourceOnExit(connection)
 
+    def dialect = filter.filter(connectionInfo,connector.connect(), connection);
+    
     modules.each { module ->
         logger.info ("Running check ${module} for ${connectionInfo.getName()} ")
 
         try {
             //def checkClass = new GroovyClassLoader().loadClass("org.dbmaster.dbstyle.checks.${module}")
             
-            ClassLoader cl = this.getClass().getClassLoader();
             def sourceCode = new GroovyCodeSource(cl.getResource("org/dbmaster/dbstyle/checks/${module}.groovy"))
             def checkClass = new GroovyClassLoader(cl).parseClass(sourceCode)
             
             def check = checkClass.newInstance()
             check.init()
             check.logger = logger
-            def dialect = connector.connect()
+           
             def collector = new org.dbmaster.dbstyle.api.MessageCollector()
             check.setMessageCollector(collector)
             
@@ -150,7 +161,7 @@ try {
                if (!required_severity_levels.contains(issue.severity)){
                    return;
                }
-                def environment = connectionInfo.getProperties().find{it.key=="environment"}?.value
+                def environment = connectionInfo.getCustomData("Environment")
                 println """
                <tr>
                  <td>${connectionInfo.getName()}</td>
@@ -176,6 +187,10 @@ try {
 }
 
 }
+
 println "</table>"
+
+filter.destroy();
+
 
 logger.info("Check is completed")

@@ -67,6 +67,8 @@
                     <string>info</string>
                 </values>
              </parameter>
+             
+             <parameter name="p_filter"    title="Filter"   type="text" required="true" width="300" height="10" />
 
         </parameters>
 
@@ -138,6 +140,7 @@
                     <string>info</string>
                 </values>
              </parameter>
+             <parameter name="p_filter"               title="Filter"   type="text" required="true" width="300" height="10" />
              <parameter name="p_tracking_file"        title="Path to Excel file"   type="string" required="true" />
              <parameter name="p_email"                title="Email"   type="string" required="false" />
              <parameter name="p_backup"               title="Backup"   type="boolean" required="true" defaultValue="false" />

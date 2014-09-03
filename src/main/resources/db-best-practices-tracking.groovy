@@ -30,6 +30,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import java.text.SimpleDateFormat;
 import io.dbmaster.tools.excelsync.ExcelSync;
+import org.dbmaster.dbstyle.api.InputFilter;
 
 
 def toURL = { link ->
@@ -117,6 +118,12 @@ println  """
         </tr>
 """
 
+def cl = this.getClass().getClassLoader();
+InputFilter filter = cl.parseClass(p_filter).newInstance();
+
+filter.init([dbm:dbm,logger:logger]);
+
+
 ExcelSync excelSync = new ExcelSync(
     ["Server","Environment","CheckID","Object Type","Object Name","Severity","Issue","TechKey","Status"],   
     ["Server","CheckID","Object Type","Object Name","TechKey"],
@@ -138,9 +145,15 @@ try {
         logger.info("Skipping checks for connection ${connectionInfo.getName()} as it is not a database one")
         return
     }
+    if (!filter.accept(connectionInfo)){
+        return;
+    }
+    
     connection = connector.getJdbcConnection(null)
     connection.setTransactionIsolation(java.sql.Connection.TRANSACTION_READ_UNCOMMITTED)
     dbm.closeResourceOnExit(connection)
+    
+    def dialect = filter.filter(connectionInfo,connector.connect(), connection);
 
     modules.each { module ->
         logger.info ("Running check ${module} for ${connectionInfo.getName()} ")
@@ -148,14 +161,13 @@ try {
         try {
             //def checkClass = new GroovyClassLoader().loadClass("org.dbmaster.dbstyle.checks.${module}")
             
-            ClassLoader cl = this.getClass().getClassLoader();
             def sourceCode = new GroovyCodeSource(cl.getResource("org/dbmaster/dbstyle/checks/${module}.groovy"))
             def checkClass = new GroovyClassLoader(cl).parseClass(sourceCode)
             
             def check = checkClass.newInstance()
             check.init()
             check.logger = logger
-            def dialect = connector.connect()
+
             def collector = new org.dbmaster.dbstyle.api.MessageCollector()
             check.setMessageCollector(collector)
             
@@ -187,7 +199,7 @@ try {
                if (!required_severity_levels.contains(issue.severity)){
                    return;
                }
-                def environment = connectionInfo.getProperties().find{it.key=="environment"}?.value
+                def environment = connectionInfo.getCustomData("Environment")
                 
                 excelSync.addRow(connectionInfo.getName(), environment ?: "", module, issue.object_type, issue.object_name,
                     issue.severity, issue.description, issue.object_key == null ? "" :  serverName + "."+issue.object_key );
@@ -218,6 +230,8 @@ try {
 
 }
 println "</table>"
+
+filter.destroy();
 
 int[] score = excelSync.syncAndReturnScore();
 
