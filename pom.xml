@@ -7,7 +7,7 @@
     <name>Database Best Practices</name>
     <description>Checks sql server for compliance with best practices</description>
 
-    <version>0.9.13</version>
+    <version>0.9.14</version>
     <packaging>bundle</packaging>
 
     <parent>
@@ -20,7 +20,7 @@
         <dependency>
              <groupId>io.dbmaster.tools</groupId>
              <artifactId>data-tracker</artifactId>
-             <version>0.0.6</version>
+             <version>0.0.7</version>
         </dependency>
     </dependencies>
     
@@ -36,7 +36,7 @@
                         <Tags>inventory,sqlserver</Tags>
                         <Author>slava.christin</Author>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        <Import-Package>io.dbmaster.api;version="1.8.0",io.dbmaster.tools.excelsync;version="0.0.6"</Import-Package>
+                        <Import-Package>io.dbmaster.api;version="1.8.0",io.dbmaster.tools.excelsync;version="0.0.7"</Import-Package>
                     </instructions>
                 </configuration>
             </plugin>

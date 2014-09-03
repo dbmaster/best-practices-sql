@@ -32,7 +32,6 @@ import java.text.SimpleDateFormat;
 import io.dbmaster.tools.excelsync.ExcelSync;
 import org.dbmaster.dbstyle.api.InputFilter;
 
-
 def toURL = { link ->
     link==null ? "NULL" : link.encodeURL().replaceAll("\\+", "%20")
 }
@@ -125,9 +124,10 @@ filter.init([dbm:dbm,logger:logger]);
 
 
 ExcelSync excelSync = new ExcelSync(
-    ["Server","Environment","CheckID","Object Type","Object Name","Severity","Issue","TechKey","Status"],   
+    ["Server","Environment","CheckID","Object Type","Object Name","Severity","Issue","TechKey","Status","Change Date"],   
     ["Server","CheckID","Object Type","Object Name","TechKey"],
-    "Status", 
+    "Status",
+    "Change Date",
     "New", 
     "AutoClosed", 
     ["Ignore"] as Set,
