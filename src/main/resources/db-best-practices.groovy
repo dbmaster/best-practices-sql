@@ -162,8 +162,6 @@ dbConnections.each { connectionInfo ->
             return;
         }
 
-        dbmSync.loadRecords("Server=\"${serverName}\"")
-        
         connection = connector.getJdbcConnection(null)
         connection.setTransactionIsolation(java.sql.Connection.TRANSACTION_READ_UNCOMMITTED)
         dbm.closeResourceOnExit(connection)
@@ -173,6 +171,8 @@ dbConnections.each { connectionInfo ->
     
         modules.each { module ->
             logger.info ("Running check ${module} for ${serverName} ")
+            
+            dbmSync.loadRecords("Server=\"${serverName}\ && CheckID=\"${module}\"")
 
             try {
                 // TODO check if source does not exist
@@ -204,9 +204,6 @@ dbConnections.each { connectionInfo ->
                 
                 check.setParameters(parameters)
                 check.check(connection, dialect)
-                // --- update storage
-                
-                
 
                 // -----------------Layout ------------------------------------------------------------------
                 collector.messages.sort { it -> it.object_type + it.object_name }
@@ -247,14 +244,13 @@ dbConnections.each { connectionInfo ->
                      <td>${record.getCustomData("Owner")?:""}</td>
                      <td>${record.getCustomData("Notes")?:""}</td></tr>"""
                 }
+                def statistics = dbmSync.completeSync()
             } catch (Exception e) {
-                def msg = "Cannot check ${module} for ${serverName} "+e.getMessage()
-                org.slf4j.LoggerFactory.getLogger(this.getClass()).error(msg,e);
-                logger.error (msg)
+                def msg = "Cannot check ${module} for ${serverName}: ${e.getMessage()}"
+                org.slf4j.LoggerFactory.getLogger(this.getClass()).error(msg, e)
+                logger.error(msg)
             }
         } // end of modules loop
-        def records = dbmSync.completeSync();
-        
     } catch (Exception e) {
         def msg = "Error occurred "+e.getMessage()
         org.slf4j.LoggerFactory.getLogger(this.getClass()).error(msg,e);
@@ -267,6 +263,4 @@ println "</table>"
 if (filter!=null) {
     filter.destroy();
 }
-
-
 logger.info("Check is completed")
