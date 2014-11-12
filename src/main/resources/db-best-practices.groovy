@@ -172,7 +172,7 @@ dbConnections.each { connectionInfo ->
         modules.each { module ->
             logger.info ("Running check ${module} for ${serverName} ")
             
-            dbmSync.loadRecords("Server=\"${serverName}\ && CheckID=\"${module}\"")
+            dbmSync.loadRecords("Server=\"${serverName}\" && CheckID=\"${module}\"")
 
             try {
                 // TODO check if source does not exist
@@ -263,4 +263,4 @@ println "</table>"
 if (filter!=null) {
     filter.destroy();
 }
-logger.info("Check is completed")
+logger.info("Check completed")
