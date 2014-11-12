@@ -108,6 +108,7 @@ if (p_modules!=null && p_modules.size()>0) {
         createField("Severity",Type.STRING,true,true),
         createField("Issue",Type.STRING,true,true),
         createField("Review status",Type.STRING,false,false),
+        // TODO Add values: New, Assigned, Ignore, AutoClosed, Closed
         createField("Owner",Type.STRING,false,false),
         createField("Notes",Type.TEXT,false,false)
     ]
