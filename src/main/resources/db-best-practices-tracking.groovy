@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry
 
-import com.branegy.service.base.api.ProjectService;
+import com.branegy.service.base.api.ProjectService
 import com.branegy.service.core.QueryRequest
 import com.branegy.service.connection.api.ConnectionService
 import com.branegy.dbmaster.connection.ConnectionProvider
@@ -131,14 +131,14 @@ ExcelSync excelSync = new ExcelSync(
     "New", 
     "AutoClosed", 
     ["Ignore"] as Set,
-    ["Ignore","AutoClosed","Closed"] as Set,
+    ["Ignore", "AutoClosed", "Closed"] as Set,
     new File(p_tracking_file),
     logger,
     p_backup
 );
 
 dbConnections.each { connectionInfo ->
-try {    
+try {
     connector = ConnectionProvider.getConnector(connectionInfo)
     def serverName = connectionInfo.getName()
     if (!(connector instanceof JdbcConnector)) {
