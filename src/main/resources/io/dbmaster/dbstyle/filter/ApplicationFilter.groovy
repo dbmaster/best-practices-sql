@@ -1,6 +1,6 @@
 import com.branegy.dbmaster.model.DatabaseInfo
 
-import org.dbmaster.dbstyle.api.InputFilter
+import io.dbmaster.dbstyle.api.InputFilter
 import java.sql.Connection
 import java.util.Map
 import org.slf4j.Logger

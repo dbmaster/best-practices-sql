@@ -1,4 +1,4 @@
-package org.dbmaster.dbstyle.api;
+package io.dbmaster.dbstyle.api;
 
 public enum SeverityLevel {
     IGNORE, INFO, WARNING,  ERROR;

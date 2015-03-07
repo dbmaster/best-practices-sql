@@ -30,7 +30,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import java.text.SimpleDateFormat;
 import io.dbmaster.tools.excelsync.ExcelSync;
-import org.dbmaster.dbstyle.api.InputFilter;
+import io.dbmaster.dbstyle.api.InputFilter;
 
 def toURL = { link ->
     link==null ? "NULL" : link.encodeURL().replaceAll("\\+", "%20")
@@ -159,16 +159,16 @@ try {
         logger.info ("Running check ${module} for ${connectionInfo.getName()} ")
 
         try {
-            //def checkClass = new GroovyClassLoader().loadClass("org.dbmaster.dbstyle.checks.${module}")
+            //def checkClass = new GroovyClassLoader().loadClass("io.dbmaster.dbstyle.checks.${module}")
             
-            def sourceCode = new GroovyCodeSource(cl.getResource("org/dbmaster/dbstyle/checks/${module}.groovy"))
+            def sourceCode = new GroovyCodeSource(cl.getResource("io/dbmaster/dbstyle/checks/${module}.groovy"))
             def checkClass = new GroovyClassLoader(cl).parseClass(sourceCode)
             
             def check = checkClass.newInstance()
             check.init()
             check.logger = logger
 
-            def collector = new org.dbmaster.dbstyle.api.MessageCollector()
+            def collector = new io.dbmaster.dbstyle.api.MessageCollector()
             check.setMessageCollector(collector)
             
             def parameters = [:]

@@ -3,7 +3,7 @@ import java.util.Iterator
 import java.util.List
 import java.util.Map.Entry
 import com.branegy.service.base.api.ProjectService
-import org.dbmaster.dbstyle.api.InputFilter
+import io.dbmaster.dbstyle.api.InputFilter
 import com.branegy.service.core.QueryRequest
 import com.branegy.service.connection.api.ConnectionService
 import com.branegy.dbmaster.connection.ConnectionProvider
@@ -47,10 +47,9 @@ def linkToObject = { type, serverName, objectName  ->
     } else if (type.equals("Server")) {
         return  "${prefix}/servers/server:${toURL(serverName)}"
     } else if (type.equals("Database")) {
-        return  "${prefix}/databases/server:${toURL(serverName)},db:${toURL(objectName)}"
+        return  "${prefix}/databases/connection:${toURL(serverName)},db:${toURL(objectName)}"
     } else if (type.equals("Connection")) {
-        // TODO here there should be a link to server
-        return  "${prefix}/databases/search:ServerName=${toURL(serverName)}" 
+        return  "${prefix}/connections/connection:${toURL(serverName)}" 
     } else if (type.equals("Job")) {
         // TODO we do not have any information about jobs in dbmaster yet
         return  "${prefix}/databases" 
@@ -75,14 +74,9 @@ if (p_modules!=null && p_modules.size()>0) {
     modules = p_modules 
 } else {
     modules  =
-        ["NonDefaultStartupProc", "ForeignKeysNoIndexes",  "WideIndex",  "DuplicateIndexes",
-         "ExtraIndexes", "FragmentedIndexes", "NoIndexes", "NoClusteredIndexes", "OutdatedStatistics",
-         "AutoCreateStatistics",  "AutoUpdateStatistics", "TempDbFileSizeDifferent", "TempDbSingleFile",
-         "UserAndTempDbSameDisk", "SmallTempDbSize", "AutoShrinkEnabled",  "LargeAutoGrowth",
-         "ChecksumDisabled", "LowCompatibilityLevel", "LoginsWithoutPolicy",
-         "SimpleRecoveryMode", "NonMasterCollation", "ServerAdmins", "DatabaseAdmins",  "JobOwnerIsAdmin",
-         "AutoGrowthIsPercentage", "RedundantIndexes", "NoDataPurityCheck", "NoDbccCheck","OrphanedLogins",
-         "OrphanedUsers"]
+        [
+          "FragmentedIndexes","UserObjectSystemDB"
+        ]
 }
 
     def trackingStorageType = "best practices"
@@ -177,14 +171,18 @@ dbConnections.each { connectionInfo ->
 
             try {
                 // TODO check if source does not exist
-                def sourceCode = new GroovyCodeSource(cl.getResource("org/dbmaster/dbstyle/checks/${module}.groovy"))
+                def moduleImpl = cl.getResource("io/dbmaster/dbstyle/checks/${module}.groovy")
+                if (moduleImpl == null) { 
+                   throw new Exception("Implementation for check ${module} does not exist")
+                }
+                def sourceCode = new GroovyCodeSource(moduleImpl)
                 def checkClass = new GroovyClassLoader(cl).parseClass(sourceCode)
                 
                 def check = checkClass.newInstance()
                 check.init()
                 check.logger = logger
                
-                def collector = new org.dbmaster.dbstyle.api.MessageCollector()
+                def collector = new io.dbmaster.dbstyle.api.MessageCollector()
                 check.setMessageCollector(collector)
                 
                 def parameters = [:]
@@ -194,11 +192,19 @@ dbConnections.each { connectionInfo ->
                         def key_value = it.split("=")
                         if (key_value.length>=2) {
                             def value = key_value[1..key_value.length-1].join("=")
-                            parameters[key_value[0]] = value
+                            def currentValue = parameters[key_value[0]]
+                            if (currentValue!=null) {
+                                if (currentValue instanceof List) {
+                                    currentValue.add(value)
+                                } else {
+                                    parameters[key_value[0]] = [currentValue, value]
+                                }
+                            } else {
+                                parameters[key_value[0]] = value
+                            }
                             logger.info("Setting property ${key_value[0]} to ${value}")
-                        } else {                        
-                            System.out.println("Setting property ${key_value[0]} to '${value}'")
-                            logger.error("Cannot recognize property ${it}")
+                        } else {
+                            logger.warn("Cannot recognize property ${it}")
                         }
                     }
                 }
