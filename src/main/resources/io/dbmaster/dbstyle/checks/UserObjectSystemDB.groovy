@@ -14,7 +14,6 @@ public class UserObjectSystemDB extends Check {
             o.type,
             o.type_desc,
             o.create_date,
-            'sysdb.valid_object=msdb.'+s.name+'.'+o.name as exlude_filter,
             o.modify_date
           from ${dbName}.sys.objects o
           inner join ${dbName}.sys.schemas s on o.schema_id = s.schema_id
