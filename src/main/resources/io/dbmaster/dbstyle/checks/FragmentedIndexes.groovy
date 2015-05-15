@@ -75,7 +75,7 @@ public class FragmentedIndexes extends Check {
                          "object_name" : database_name,
                          "severity"    : "warning",
                          "object_key"  : database_name+"."+it.schema_name+"."+it.object_name+"."+it.index_name,
-                         "description" : "Index " + it.index_name + " defragmentation " + format(it.fragmentation) + " for "+
+                         "description" : "Index " + it.index_name + " fragmentation " + format(it.fragmentation) + " for "+
                                           (it.object_type.trim().equals("U") ? "table" : "view") + " "+ it.schema_name + "." + it.object_name +
                                           " is above threshold of "+min_fragmentation+"%"
                        ])
