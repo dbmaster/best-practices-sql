@@ -24,7 +24,7 @@
                 </values>
              </parameter>
 
-             <parameter name="p_servers"        title="Database Servers"   type="string" required="false" multiple="true" 
+             <parameter name="p_servers"        title="Database Server(s)"   type="string" required="false" multiple="true" 
                         suggestion="connections" width="300" />
 
              <parameter name="p_properties"    title="Properties"   type="text" required="false" width="100" height="5" />
@@ -44,5 +44,35 @@
         <output  script="db-best-practices.groovy" type="html" />
     </tool>
 
+<!-- 
+
+<tool id="stale-jobs" title="Stale Jobs" projectTypes="inventory">
+
+        <description></description>
+
+        <parameters>
+             <parameter name="p_servers"        title="Servers"   type="string" required="false" multiple="true" 
+                        suggestion="project_connections" width="300" />
+
+             <parameter name="p_started_days_ago"   title="Started Days Ago"    type="integer" required="true" defaultValue="180" />
+
+             <parameter name="p_modified_days_ago"  title="Modified Days Ago"   type="integer" required="true" defaultValue="30"  />
+
+             <parameter name="p_action"  title="Action" type="string" required="true" defaultValue="List Jobs">
+                <values>
+                    <string>List Jobs</string>
+                    <string>Generate Script</string>
+                    <string>Run Script</string>
+                </values>
+             </parameter>
+
+             <parameter name="p_filter"  title="Filter"   type="text" required="false" />
+
+        </parameters>
+
+        <output  script="stale-jobs.groovy" type="html" />
+    </tool>
+
+-->
 
 </tools>
