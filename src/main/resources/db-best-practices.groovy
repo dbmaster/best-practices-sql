@@ -134,6 +134,7 @@ println  """
             <td>Status</td>
             <td>Owner</td>
             <td>Notes</td>
+            <td>TechKey</td>
         </tr>
 """
 
@@ -249,7 +250,8 @@ dbConnections.each { connectionInfo ->
                      <td>${issue.description}</td>
                      <td>${record.getCustomData("Review status")?:""}</td>
                      <td>${record.getCustomData("Owner")?:""}</td>
-                     <td>${record.getCustomData("Notes")?:""}</td></tr>"""
+                     <td>${record.getCustomData("Notes")?:""}</td>
+                     <td>${issue.object_key == null ? "" :  serverName + "."+issue.object_key}</td></tr>"""
                 }
                 def statistics = dbmSync.completeSync()
             } catch (Exception e) {
