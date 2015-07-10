@@ -38,7 +38,7 @@ public class FragmentedIndexes extends Check {
                             "${dbInfo.getCustomData("State")}. Skipping the check")
                 return
             } else {
-                logger.info("Checking database ${database_name}")
+                logger.debug("Checking database ${database_name}")
             }
 
             try {
