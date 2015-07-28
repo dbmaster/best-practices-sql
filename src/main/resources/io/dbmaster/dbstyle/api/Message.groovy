@@ -1,6 +1,6 @@
-package io.dbmaster.dbstyle.api;
+package io.dbmaster.dbstyle.api
 
-import java.util.TreeSet;
+import java.util.TreeSet
 
 public final class Message {
 

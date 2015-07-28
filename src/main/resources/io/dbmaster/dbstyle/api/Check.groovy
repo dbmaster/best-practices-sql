@@ -1,23 +1,26 @@
-package io.dbmaster.dbstyle.api;
+package io.dbmaster.dbstyle.api
 
-import java.sql.Connection;
-import java.util.Map;
+import java.sql.Connection
+import java.util.Map
+import com.branegy.scripting.DbMaster
 
 public class Check {
     /**
      * the severity level of any violations found
      */
-    private SeverityLevel severityLevel = SeverityLevel.ERROR;
+    private SeverityLevel severityLevel = SeverityLevel.ERROR
 
     /** the identifier of the reporter */
-    private String id;
+    private String id
 
     /** the object for collecting messages. */
-    private MessageCollector collector;
+    private MessageCollector collector
 
-    private Map parameters;
+    private Map parameters
 
     def logger
+    
+    DbMaster dbm
 
     public void check(Connection connection) {}
 

@@ -1,9 +1,9 @@
-package io.dbmaster.dbstyle.api;
+package io.dbmaster.dbstyle.api
 
 import java.util.*
 
 public final class MessageCollector {
-    private final List<Message> messages = new ArrayList<Message>();
+    private final List<Message> messages = new ArrayList<Message>()
 
     /** @return the logged messages **/
     public List<Message> getMessages() {

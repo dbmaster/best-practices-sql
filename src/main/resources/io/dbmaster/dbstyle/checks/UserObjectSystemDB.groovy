@@ -1,4 +1,4 @@
-package io.dbmaster.dbstyle.checks;
+package io.dbmaster.dbstyle.checks
 
 import io.dbmaster.dbstyle.api.*
 import static io.dbmaster.dbstyle.api.SeverityLevel.*
