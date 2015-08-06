@@ -4,6 +4,7 @@ import io.dbmaster.dbstyle.api.*
 import static io.dbmaster.dbstyle.api.SeverityLevel.*
 import java.sql.Connection
 import groovy.sql.Sql
+import com.branegy.dbmaster.connection.Dialect
 
 public class UserObjectSystemDB extends Check {
 
@@ -21,7 +22,7 @@ public class UserObjectSystemDB extends Check {
           order by s.name, o.name""" }
           
 
-    public void check(Connection connection, dialect) {
+    public void check(Connection connection, Dialect dialect) {
         def ignoreList = getParameter("sysdb.valid_object")
         if (ignoreList==null) {
             ignoreList = []

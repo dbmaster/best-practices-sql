@@ -3,13 +3,14 @@ package io.dbmaster.dbstyle.checks
 import io.dbmaster.dbstyle.api.*
 import java.sql.Connection
 import groovy.sql.Sql
+import com.branegy.dbmaster.connection.Dialect
 
 public class FragmentedIndexes extends Check {
     def formatter =  new java.text.DecimalFormat("#.##")
 
     def format = { value -> formatter.format(value) }
 
-    public void check(Connection connection, dialect) {
+    public void check(Connection connection, Dialect dialect) {
         def min_fragmentation = getParameter("min_fragmentation")
         if (min_fragmentation==null) {
            min_fragmentation = 30.0

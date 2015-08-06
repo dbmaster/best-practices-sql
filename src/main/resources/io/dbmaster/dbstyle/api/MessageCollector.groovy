@@ -7,12 +7,12 @@ public final class MessageCollector {
 
     /** @return the logged messages **/
     public List<Message> getMessages() {
-        return messages;
+        return messages
     }
 
     /** Reset the object. **/
     public void reset() {
-        messages.clear();
+        messages.clear()
     }
 
     /**
@@ -20,11 +20,11 @@ public final class MessageCollector {
      * @param aMsg the message to log
      **/
     public void add(Message msg) {
-        messages.add(msg);
+        messages.add(msg)
     }
 
     /** @return the number of messages */
     public int size() {
-        return messages.size();
+        return messages.size()
     }
 }

@@ -1,34 +1,22 @@
-import java.util.ArrayList
-import java.util.Iterator
-import java.util.List
-import java.util.Map.Entry
-import com.branegy.service.base.api.ProjectService
-import io.dbmaster.dbstyle.api.InputFilter
+import io.dbmaster.dbstyle.api.ObjectFilter
+import io.dbmaster.dbstyle.api.Context
+import io.dbmaster.dbstyle.api.Scope
+import io.dbmaster.dbstyle.api.Suppression
+import io.dbmaster.dbstyle.filter.InventoryFilter
+
 import com.branegy.service.core.QueryRequest
 import com.branegy.service.connection.api.ConnectionService
 import com.branegy.dbmaster.connection.ConnectionProvider
 import com.branegy.dbmaster.connection.JdbcConnector
-//import com.branegy.dbmaster.custom.field.server.api.ICustomFieldService
-//import com.branegy.dbmaster.custom.*
-// import io.dbmaster.tools.datatracker.DBMasterSync
-// import com.branegy.dbmaster.custom.CustomFieldConfig.Type
-
-
-def toURL = { link ->
-    link==null ? "NULL" : link.encodeURL().replaceAll("\\+", "%20")
-}
-String.metaClass.encodeURL = { java.net.URLEncoder.encode(delegate) }
-
-String projectName =  dbm.getService(ProjectService.class).getCurrentProject().getName();
+import io.dbmaster.tools.DbmTools
 
 def acceptable_severity = {input_severity ->
     def acceptable_levels = []
-
     switch(input_severity) {
         case "":
         case "info":
         case null:
-            acceptable_levels.addAll(['error', 'warning', 'info']);
+            acceptable_levels.addAll(['error', 'warning', 'info'])
             break;
         case "warning":
             acceptable_levels.addAll(['error', 'warning'])
@@ -40,47 +28,59 @@ def acceptable_severity = {input_severity ->
     return acceptable_levels;
 }
 
-def linkToObject = { type, serverName, objectName  ->
-    prefix = "#inventory/project:${toURL(projectName)}"
-    if (type.equals("Application")) {
-        return "${prefix}/applications/application:${toURL(objectName)}"
-    } else if (type.equals("Server")) {
-        return  "${prefix}/servers/server:${toURL(serverName)}"
-    } else if (type.equals("Database")) {
-        return  "${prefix}/databases/connection:${toURL(serverName)},db:${toURL(objectName)}"
-    } else if (type.equals("Connection")) {
-        return  "${prefix}/connections/connection:${toURL(serverName)}" 
-    } else if (type.equals("Job")) {
-        // TODO we do not have any information about jobs in dbmaster yet
-        return  "${prefix}/databases" 
+def getClassInstance = { sourceFile ->
+    def cl = this.getClass().getClassLoader()
+    def moduleImpl = cl.getResource(sourceFile)
+    if (moduleImpl == null) { 
+        return null
     } else {
-        throw new RuntimeException("Object type ${type} was not expected")
+        def sourceCode = new GroovyCodeSource(moduleImpl)
+        def checkClass = new GroovyClassLoader(cl).parseClass(sourceCode)
+        return checkClass.newInstance()
     }
 }
 
 def required_severity_levels = acceptable_severity(p_severity)
-
 connectionSrv = dbm.getService(ConnectionService.class)
-//<DatabaseConnection> getConnectionSlice(QueryRequest params, String name);
-    
-    
-    
-// def dbConnections
-// if (p_servers!=null && p_servers.size()>0) {
-//    dbConnections = p_servers.collect { serverName -> connectionSrv.findByName(serverName) }
-//} else {
-//    dbConnections  = connectionSrv.getConnectionList()
-//}
+
+def tools = new DbmTools ( dbm, logger, getBinding().out)
 
 def config = new XmlSlurper().parseText(p_config)
+
+// INITIALIZE SCOPES AND FILTERS
 def scopes = [:]
-config.scope.each { scope ->
-    logger.debug ( "Scope:"+scope.@name )
-    def name = scope.@name.toString()
-    scopes[name] = [:]
-    scope.children().each { child ->
-        scopes[name].put(child.name(), ["include" : child.@include, "exclude": child.@exclude] )
-        logger.debug("Add filter "+child.name() + " include:"  + child.@include + " exclude:" + child.@exclude)
+config.scope.each { scopeNode ->
+    logger.debug ( "Scope:"+scopeNode.@name )
+    Scope scope = new Scope(scopeNode.@name.toString())
+    
+    // def name =     
+    scopes[scope.name] = scope
+    scopeNode.children().each { child ->
+        def childName = child.name()
+        def filterParameters = [:]
+        if (childName.equals("filter")) {
+            String sourceCode = child.@class.toString().replaceAll("\\.","/")+".groovy"
+            logger.debug("Loading filter ${sourceCode}")
+            ObjectFilter filter = getClassInstance(sourceCode)
+            scopeNode.property.each { p ->
+                logger.debug ("Filter property:"+p.@name+":"+p.@value )
+                filterParameters[key] = value
+            }
+            filter.init(tools, filterParameters)
+            scope.addFilter(filter)
+        } else {
+            logger.debug("Add filter "+child.name() + " i:"  + child.@include + " e:" + child.@exclude)            
+            if (child.@include!=null) {
+                def filter = new InventoryFilter(childName, child.@include.toString(), InventoryFilter.INCLUDE)
+                filter.init(tools, filterParameters)
+                scope.addFilter(filter)                
+            }
+            if (child.@exclude!=null) {
+                def filter = new InventoryFilter(childName, child.@exclude.toString(), InventoryFilter.EXCLUDE)
+                filter.init(tools, filterParameters)
+                scope.addFilter(filter)
+            }
+        }
     }
 }
         
@@ -98,35 +98,33 @@ println  """
         </tr>
 """
 
-def cl = this.getClass().getClassLoader()
+Context context = new Context()
+context.logger = logger
+context.dbm = dbm
+context.suppressions = config.suppressions.suppression.collect { 
+                         new Suppression(it.@check.toString(), it.@key.toString()) 
+                       }
 
 config.checkSet.each { checkSet ->
-    logger.info( "starting checkSet:"+checkSet.@scope)
+    logger.info( "Starting checkSet:"+checkSet.@scope)
     
-    def scope = checkSet.@scope
-    if (scope==null) {
-        logger.error("No scope defined")
-        return
-    }
-
-    def dbConnections = []
-    scope.toString().split(",").each { it ->        
-        if (it.equals("all")) {
-            dbConnections  = connectionSrv.getConnectionList()
-            return
-        } else {        
-            def scopeDef = scopes[it.trim()]
-            if (scopeDef == null) {
-                logger.error("Scope ${it} not defined")
-            } else {
-                if (scopeDef.servers!=null  && scopeDef.servers.include!=null) {
-                    def query = new QueryRequest(scopeDef.servers.include.toString())
-                    dbConnections.addAll( connectionSrv.getConnectionSlice(query, null) )
+    def scopeAttr = checkSet.@scope
+    context.scopeList = []
+    if (scopeAttr==null) {
+        logger.warn("No scope defined for checkset. Including everything")
+    } else {
+        for (String scopeId: scopeAttr.toString().split(",")) {
+            scopeId = scopeId.trim()
+            if (scopeId.equals("all")) {
+                // empty scope means include everything
+                context.scopeList.clear()
+                break
+            } else {        
+                def scopeDef = scopes[scopeId]
+                if (scopeDef == null) {
+                    logger.error("Scope with name ${it} was not defined")
                 } else {
-                    // no servers scope defined. using all by default
-                    logger.debug("Server scope not defined. Using all servers")
-                    dbConnections  = connectionSrv.getConnectionList()
-                    return
+                    context.scopeList.add ( scopeDef )
                 }
             }
         }
@@ -135,10 +133,14 @@ config.checkSet.each { checkSet ->
     // 
     def checks = [:]
 
-    dbConnections.each { connectionInfo ->
+    connectionSrv.connectionList.each { connectionInfo ->
         try {
+            if (!context.isObjectInScope(connectionInfo)) {
+                logger.debug("Skipping checks for connection ${connectionInfo.getName()}.Out of scope")
+                return
+            }
             connector = ConnectionProvider.getConnector(connectionInfo)
-            def serverName = connectionInfo.getName()
+            context.serverName = connectionInfo.getName()            
             if (!(connector instanceof JdbcConnector)) {
                 logger.info("Skipping checks for connection ${connectionInfo.getName()} as it is not a database one")
                 return
@@ -148,8 +150,8 @@ config.checkSet.each { checkSet ->
             connection.setTransactionIsolation(java.sql.Connection.TRANSACTION_READ_UNCOMMITTED)
             dbm.closeResourceOnExit(connection)
 
-            def dialect = connector.connect(); //filter==null ? 
-                                       //: filter.filter(connectionInfo,connector.connect(), connection)
+            def dialect = connector.connect() //filter==null ? 
+                                       //: filter.filter(connectionInfo, connector.connect(), connection)
         
             checkSet.check.each { checkXML ->
                 def checkName = checkXML.@name
@@ -158,25 +160,19 @@ config.checkSet.each { checkSet ->
                     return
                 }
                 
-                logger.info ("Running check ${checkName} for ${serverName} ")
+                logger.info ("Running check ${checkName} for ${context.serverName} ")
                 
-                // dbmSync.loadRecords("Server=\"${serverName}\" && CheckID=\"${checkName}\"")
+                // dbmSync.loadRecords("Server=\"${context.serverName}\" && CheckID=\"${checkName}\"")
 
                 try {
                     // TODO check if source does not exist
                     def check = checks[checkName]
                     if (check==null) {
-                        def moduleImpl = cl.getResource("io/dbmaster/dbstyle/checks/${checkName}.groovy")
-                        if (moduleImpl == null) { 
-                           throw new Exception("Implementation for check ${checkName} was not found")
+                        check = getClassInstance("io/dbmaster/dbstyle/checks/${checkName}.groovy")
+                        if (check==null) {
+                            throw new Exception("Implementation for check ${checkName} was not found")
                         }
-                        def sourceCode = new GroovyCodeSource(moduleImpl)
-                        def checkClass = new GroovyClassLoader(cl).parseClass(sourceCode)
-                        
-                        check = checkClass.newInstance()
-                        check.logger = logger
-                        check.dbm = dbm
-                        check.init()
+                        check.init(context)
                         checks[checkName] = check
                     }
                    
@@ -241,21 +237,20 @@ config.checkSet.each { checkSet ->
                         }
                         def environment = connectionInfo.getCustomData("Environment")
                         
-                        
-                    println """
-                       <tr>
-                         <td>${connectionInfo.getName()}</td>
-                         <td>${environment ?: ""}</td>
-                         <td>${checkName}</td>
-                         <td>${issue.object_type}</td>
-                         <td><a href="${linkToObject(issue.object_type, serverName, issue.object_name)}">${issue.object_name}</a></td>
-                         <td>${issue.severity}</td>
-                         <td>${issue.description}</td>
-                         <td>${issue.object_key == null ? "" :  serverName + "."+issue.object_key}</td></tr>"""
+                        println """
+                           <tr>
+                             <td>${connectionInfo.getName()}</td>
+                             <td>${environment ?: ""}</td>
+                             <td>${checkName}</td>
+                             <td>${issue.object_type}</td>
+                             <td><a href="${linkToObject(issue.object_type, context.serverName, issue.object_name)}">${issue.object_name}</a></td>
+                             <td>${issue.severity}</td>
+                             <td>${issue.description}</td>
+                             <td>${issue.object_key == null ? "" :  context.serverName + "."+issue.object_key}</td></tr>"""
                     }
                     // def statistics = dbmSync.completeSync()
                 } catch (Exception e) {
-                    def msg = "Cannot check ${checkName} for ${serverName}: ${e.getMessage()}"
+                    def msg = "Cannot check ${checkName} for ${context.serverName}: ${e.getMessage()}"
                     org.slf4j.LoggerFactory.getLogger(this.getClass()).error(msg, e)
                     logger.error(msg)
                 }

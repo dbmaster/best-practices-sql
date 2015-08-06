@@ -1,7 +1,5 @@
 package io.dbmaster.dbstyle.api
 
-import java.util.TreeSet
-
 public final class Message {
 
     String object_type;
