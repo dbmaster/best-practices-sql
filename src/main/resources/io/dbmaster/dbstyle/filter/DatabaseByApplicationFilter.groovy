@@ -14,6 +14,7 @@ public class DatabaseByApplicationFilter extends ObjectFilter {
     public void init(DbmTools tools, Map<String,Object> properties) {
         def dbm = tools.dbm
         def appFilter =  properties.get("filter")
+        tools.logger.debug("DatabaseByApplicationFilter.Filter = ${appFilter}")
         InventoryService inventorySrv = dbm.getService(InventoryService.class)
         
         def filteredApps = inventorySrv.getApplicationList(new QueryRequest(appFilter))
@@ -21,14 +22,16 @@ public class DatabaseByApplicationFilter extends ObjectFilter {
         def dbLinks = inventorySrv.getDBUsageList()
         dbLinks.each { link ->
             if (filteredApps.contains(link.application) && !link.database.deleted) {
-                filteredDBs.add (link.database)
+                def name = link.database.connectionName +"."+link.database.databaseName
+                tools.logger.debug("Include database into scope: ${name} app: ${link.application.applicationName}")
+                filteredDBs.add (name)
             }
         }
     }
     
-    public boolean isObjectInScope(Object object) {
-        if (object instanceof Database) {
-            return filteredDBs.contains(object)
+    public boolean isObjectInScope(String objectType, String objectKey) {
+        if (objectType.equals("Database")) {
+            return filteredDBs.contains(objectKey)
         } else {
             return true
         }

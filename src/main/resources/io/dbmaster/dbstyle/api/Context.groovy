@@ -1,10 +1,11 @@
 package io.dbmaster.dbstyle.api
 
 import com.branegy.scripting.DbMaster
+import org.slf4j.Logger
 
 public class Context {
     
-    public def logger
+    public Logger logger
     
     public DbMaster dbm
    
@@ -14,10 +15,10 @@ public class Context {
     
     public String serverName
     
-    public boolean isObjectInScope(Object o) {
+    public boolean isObjectInScope(String objectType, String objectKey) {
         for (Scope scope: scopeList) {
             for (ObjectFilter filter: scope.filters) {
-                if (!filter.isObjectInScope(o)) {
+                if (!filter.isObjectInScope(objectType, objectKey)) {
                     return false
                 }
             }

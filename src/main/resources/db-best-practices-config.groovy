@@ -46,7 +46,7 @@ connectionSrv = dbm.getService(ConnectionService.class)
 def tools = new DbmTools ( dbm, logger, getBinding().out)
 
 def config = new XmlSlurper().parseText(p_config)
-
+def issueIndex = 0
 // INITIALIZE SCOPES AND FILTERS
 def scopes = [:]
 config.scope.each { scopeNode ->
@@ -55,28 +55,28 @@ config.scope.each { scopeNode ->
     
     // def name =     
     scopes[scope.name] = scope
-    scopeNode.children().each { child ->
-        def childName = child.name()
+    scopeNode.children().each { childNode ->
+        def childName = childNode.name()
         def filterParameters = [:]
         if (childName.equals("filter")) {
-            String sourceCode = child.@class.toString().replaceAll("\\.","/")+".groovy"
+            String sourceCode = childNode.@class.toString().replaceAll("\\.","/")+".groovy"
             logger.debug("Loading filter ${sourceCode}")
             ObjectFilter filter = getClassInstance(sourceCode)
-            scopeNode.property.each { p ->
-                logger.debug ("Filter property:"+p.@name+":"+p.@value )
-                filterParameters[key] = value
+            childNode.property.each { p ->
+                logger.debug ("Filter property key="+p.@name+" value="+p.@value )
+                filterParameters[p.@name.toString()] = p.@value.toString()
             }
             filter.init(tools, filterParameters)
             scope.addFilter(filter)
         } else {
-            logger.debug("Add filter "+child.name() + " i:"  + child.@include + " e:" + child.@exclude)            
-            if (child.@include!=null) {
-                def filter = new InventoryFilter(childName, child.@include.toString(), InventoryFilter.INCLUDE)
+            logger.debug("Add filter "+childNode.name() + " i:"  + childNode.@include + " e:" + childNode.@exclude)            
+            if (childNode.@include!=null) {
+                def filter = new InventoryFilter(childName, childNode.@include.toString(), InventoryFilter.INCLUDE)
                 filter.init(tools, filterParameters)
                 scope.addFilter(filter)                
             }
-            if (child.@exclude!=null) {
-                def filter = new InventoryFilter(childName, child.@exclude.toString(), InventoryFilter.EXCLUDE)
+            if (childNode.@exclude!=null) {
+                def filter = new InventoryFilter(childName, childNode.@exclude.toString(), InventoryFilter.EXCLUDE)
                 filter.init(tools, filterParameters)
                 scope.addFilter(filter)
             }
@@ -87,6 +87,7 @@ config.scope.each { scopeNode ->
 println  """
    <table class="simple-table" cellspacing="0" cellpadding="10">
         <tr style="background-color:#EEE">
+            <td>#</td>
             <td>Server</td>
             <td>Environment</td>
             <td>CheckID</td>
@@ -105,8 +106,10 @@ context.suppressions = config.suppressions.suppression.collect {
                          new Suppression(it.@check.toString(), it.@key.toString()) 
                        }
 
+def checks = [:]
+
 config.checkSet.each { checkSet ->
-    logger.info( "Starting checkSet:"+checkSet.@scope)
+    logger.info( "Starting checkSet with scope "+checkSet.@scope)
     
     def scopeAttr = checkSet.@scope
     context.scopeList = []
@@ -116,6 +119,7 @@ config.checkSet.each { checkSet ->
         for (String scopeId: scopeAttr.toString().split(",")) {
             scopeId = scopeId.trim()
             if (scopeId.equals("all")) {
+                logger.info("Including everything into checkset scope")
                 // empty scope means include everything
                 context.scopeList.clear()
                 break
@@ -124,23 +128,22 @@ config.checkSet.each { checkSet ->
                 if (scopeDef == null) {
                     logger.error("Scope with name ${it} was not defined")
                 } else {
+                    logger.info("Including ${scopeId} into checkset")
                     context.scopeList.add ( scopeDef )
                 }
             }
         }
     }
 
-    // 
-    def checks = [:]
 
     connectionSrv.connectionList.each { connectionInfo ->
         try {
-            if (!context.isObjectInScope(connectionInfo)) {
-                logger.debug("Skipping checks for connection ${connectionInfo.getName()}.Out of scope")
+            context.serverName = connectionInfo.getName()            
+            if (!context.isObjectInScope("DatabaseConnection", context.serverName)) {
+                logger.debug("Skipping checks for connection ${context.serverName}. Out of scope")
                 return
             }
             connector = ConnectionProvider.getConnector(connectionInfo)
-            context.serverName = connectionInfo.getName()            
             if (!(connector instanceof JdbcConnector)) {
                 logger.info("Skipping checks for connection ${connectionInfo.getName()} as it is not a database one")
                 return
@@ -173,6 +176,7 @@ config.checkSet.each { checkSet ->
                             throw new Exception("Implementation for check ${checkName} was not found")
                         }
                         check.init(context)
+                        check.name = checkName
                         checks[checkName] = check
                     }
                    
@@ -236,14 +240,16 @@ config.checkSet.each { checkSet ->
                             return;
                         }
                         def environment = connectionInfo.getCustomData("Environment")
-                        
+                        def link = tools.linkToObject(issue.object_type, context.serverName, issue.object_name)
+                        issueIndex = issueIndex + 1
                         println """
                            <tr>
+                             <td>${issueIndex}</td>
                              <td>${connectionInfo.getName()}</td>
                              <td>${environment ?: ""}</td>
                              <td>${checkName}</td>
                              <td>${issue.object_type}</td>
-                             <td><a href="${linkToObject(issue.object_type, context.serverName, issue.object_name)}">${issue.object_name}</a></td>
+                             <td><a href="${link}">${issue.object_name}</a></td>
                              <td>${issue.severity}</td>
                              <td>${issue.description}</td>
                              <td>${issue.object_key == null ? "" :  context.serverName + "."+issue.object_key}</td></tr>"""

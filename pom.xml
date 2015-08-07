@@ -13,7 +13,7 @@
    <name>Database Best Practices</name>
    <description>Checks sql server for compliance with best practices</description>
 
-   <version>0.9.22</version>
+   <version>0.9.25</version>
    <packaging>bundle</packaging>
 
    <build>

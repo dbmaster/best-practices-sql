@@ -47,16 +47,16 @@ public class Suppression {
     public boolean checkKey(String matchKey) {
          def result = false
          switch (this.type) {
-            case ALL:
+            case SuppressionType.ALL:
                 result = true
                 break
-            case PREFIX:
+            case SuppressionType.PREFIX:
                 result = matchKey!=null && matchKey.startsWith(key)
                 break
-            case EXACT_VALUE:
+            case SuppressionType.EXACT_VALUE:
                 result = matchKey!=null && matchKey.equalsIgnoreCase(key)
                 break
-            case PATTERN:
+            case SuppressionType.PATTERN:
                 result = matchKey!=null && pattern.matcher(matchKey).matches()
                 break
             default:

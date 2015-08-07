@@ -7,3 +7,4 @@
 .loadpath
 target/
 planned/
+src/main/resources/config_planned.xml

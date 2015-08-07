@@ -26,6 +26,11 @@ public class FragmentedIndexes extends Check {
 
         dialect.getDatabases().each { dbInfo ->
             def database_name =  dbInfo.getName()
+            
+            if (!context.isObjectInScope("Database",context.serverName+"."+database_name)) {
+                logger.debug("Database ${database_name} is out of scope")
+                return
+            }
 
             def cL = dbInfo.getCustomData("Compatibility Level");
             if (Integer.parseInt(cL) <= 80) {
