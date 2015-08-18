@@ -1,0 +1,9 @@
+                    <config>
+                        <checkSet scope="all">
+                            <check name="FragmentedIndexes">
+                                <property name="min_fragmentation" value="40" />
+                                <property name="min_page_count"    value="501" />
+                            </check>
+                            <check name="UserObjectSystemDB" />
+                        </checkSet>
+                    </config>
