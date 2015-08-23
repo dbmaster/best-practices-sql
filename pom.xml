@@ -13,7 +13,7 @@
    <name>Database Best Practices</name>
    <description>Checks sql server for compliance with best practices</description>
 
-   <version>0.9.25</version>
+   <version>0.9.26</version>
    <packaging>bundle</packaging>
 
    <build>
@@ -36,7 +36,8 @@
                <instructions>
                   <Tags>inventory,sqlserver</Tags>
                   <Author>slava.christin</Author>
-                  <Import-Package>io.dbmaster.api;version="1.10.0",io.dbmaster.tools;version="0.1.6"</Import-Package>  <!-- ,io.dbmaster.tools.datatracker;version="0.1.0" -->                
+                  <Import-Package>io.dbmaster.api;version="1.10.0",io.dbmaster.tools;version="0.1.6"</Import-Package>  
+                  <!-- ,io.dbmaster.tools.datatracker;version="0.1.0" -->                
                </instructions>
             </configuration>
          </plugin>
