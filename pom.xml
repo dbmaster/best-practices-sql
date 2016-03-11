@@ -9,9 +9,9 @@
       <version>1.10</version>
    </parent>
 
-   <artifactId>db-best-practices</artifactId>
-   <name>Database Best Practices</name>
-   <description>Checks sql server for compliance with best practices</description>
+   <artifactId>best-practices-sql</artifactId>
+   <name>Best Practices::SQL Server</name>
+   <description>Checks sql servers for compliance with best practices</description>
 
    <version>0.9.26</version>
    <packaging>bundle</packaging>
