@@ -1,8 +1,7 @@
 <tools>
-    <tool id="db-best-practices" title="Database Best Practices" projectTypes="inventory">
+    <tool id="best-practices-sql" title="Best Practices::SQL Server" projectTypes="inventory">
 
         <description>Checks database servers for compliance with best practices</description>
-
         <help><![CDATA[
             
 <h2 id="FragmentedIndexes">FragmentedIndexes</h2>
