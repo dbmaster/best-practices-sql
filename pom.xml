@@ -4,16 +4,16 @@
    <modelVersion>4.0.0</modelVersion>
 
    <parent>
-      <groupId>io.dbmaster.tools</groupId>
-      <artifactId>dbmaster-root</artifactId>
-      <version>1.10</version>
+       <groupId>io.dbmaster.plugins</groupId>
+       <artifactId>dbmaster-plugin-parent</artifactId>
+       <version>2.0</version>
    </parent>
 
    <artifactId>best-practices-sql</artifactId>
    <name>Best Practices::SQL Server</name>
    <description>Checks sql servers for compliance with best practices</description>
 
-   <version>0.9.26</version>
+   <version>0.9.27-SNAPSHOT</version>
    <packaging>bundle</packaging>
 
    <build>
@@ -36,7 +36,7 @@
                <instructions>
                   <Tags>inventory,sqlserver</Tags>
                   <Author>slava.christin</Author>
-                  <Import-Package>io.dbmaster.api;version="1.10.0",io.dbmaster.tools;version="0.1.6"</Import-Package>  
+                  <Import-Package>io.dbmaster.api;version="[1.12,2.1)",io.dbmaster.tools;version="0.1.6"</Import-Package>  
                   <!-- ,io.dbmaster.tools.datatracker;version="0.1.0" -->                
                </instructions>
             </configuration>
