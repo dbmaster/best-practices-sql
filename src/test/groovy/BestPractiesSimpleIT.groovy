@@ -1,8 +1,6 @@
-import io.dbmaster.testng.BaseToolTestNGCase;
-
 import org.testng.annotations.Test
 
-import com.branegy.tools.api.ExportType;
+import io.dbmaster.testng.BaseToolTestNGCase;
 
 
 public class BestPractiesSimpleIT extends BaseToolTestNGCase {
@@ -21,7 +19,7 @@ public class BestPractiesSimpleIT extends BaseToolTestNGCase {
                     </config>"""
 
         def parameters = [ "p_config"     :  config ]
-        String found_tables = tools.toolExecutor("db-best-practices", parameters).execute()
+        String found_tables = tools.toolExecutor("best-practices-sql", parameters).execute()
         System.out.println("done! "+found_tables)
     }
 }
