@@ -7,7 +7,9 @@ import io.dbmaster.dbstyle.filter.InventoryFilter
 import com.branegy.service.core.QueryRequest
 import com.branegy.service.connection.api.ConnectionService
 import com.branegy.dbmaster.connection.ConnectionProvider
-import com.branegy.dbmaster.connection.JdbcConnector
+import com.branegy.dbmaster.connection.Dialect
+import com.branegy.dbmaster.connection.JdbcDialect
+
 import io.dbmaster.tools.DbmTools
 
 def acceptable_severity = {input_severity ->
@@ -143,17 +145,18 @@ config.checkSet.each { checkSet ->
                 logger.debug("Skipping checks for connection ${context.serverName}. Out of scope")
                 return
             }
-            connector = ConnectionProvider.getConnector(connectionInfo)
-            if (!(connector instanceof JdbcConnector)) {
+            def dialect = ConnectionProvider.get().getDialect(connectionInfo) // connector
+            dbm.closeResourceOnExit(dialect)
+            if (!(dialect instanceof JdbcDialect)) {
                 logger.info("Skipping checks for connection ${connectionInfo.getName()} as it is not a database one")
                 return
             }
 
-            connection = connector.getJdbcConnection(null)
+            connection = connector.getConnection()
             connection.setTransactionIsolation(java.sql.Connection.TRANSACTION_READ_UNCOMMITTED)
-            dbm.closeResourceOnExit(connection)
+            
 
-            def dialect = connector.connect() //filter==null ? 
+            //def dialect = connector.connect() //filter==null ? 
                                        //: filter.filter(connectionInfo, connector.connect(), connection)
         
             checkSet.check.each { checkXML ->
