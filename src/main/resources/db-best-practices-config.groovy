@@ -152,7 +152,7 @@ config.checkSet.each { checkSet ->
                 return
             }
 
-            connection = connector.getConnection()
+            connection = dialect.getConnection()
             connection.setTransactionIsolation(java.sql.Connection.TRANSACTION_READ_UNCOMMITTED)
             
 
